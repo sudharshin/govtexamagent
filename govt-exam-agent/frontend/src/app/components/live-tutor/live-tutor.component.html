@@ -1,0 +1,32 @@
+<div class="live-tutor-container">
+  <div class="header">
+    <h1>🎓 Live Tutor</h1>
+    <div class="header-actions">
+      <label class="upload-label">
+        <input 
+          type="file" 
+          accept=".pdf"
+          (change)="onFileSelected($event)"
+          [disabled]="loading"
+          class="file-input">
+        📄 Upload PDF
+      </label>
+      <button (click)="clearChat()" class="clear-btn">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <div class="tutor-content">
+    <div class="chat-wrapper">
+      <app-chat-interface
+        [messages]="messages"
+        [loading]="loading"
+        [placeholder]="'Ask me anything about your studies...'"
+        [onSendMessage]="onSendMessage.bind(this)">
+      </app-chat-interface>
+    </div>
+  </div>
+
+  <div *ngIf="uploadedFileName" class="file-indicator">
+    📎 Working with: {{ uploadedFileName }}
+  </div>
+</div>

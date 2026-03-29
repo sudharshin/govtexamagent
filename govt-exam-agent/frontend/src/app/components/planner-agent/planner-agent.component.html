@@ -1,0 +1,17 @@
+<div class="planner-container">
+  <div class="header">
+    <h1>📅 Study Planner</h1>
+    <button (click)="clearChat()" class="clear-btn">🗑️ Clear</button>
+  </div>
+
+  <div class="planner-content">
+    <div class="chat-wrapper">
+      <app-chat-interface
+        [messages]="messages"
+        [loading]="loading"
+        [placeholder]="'Tell me your exam and preparation timeline...'"
+        [onSendMessage]="onSendMessage.bind(this)">
+      </app-chat-interface>
+    </div>
+  </div>
+</div>

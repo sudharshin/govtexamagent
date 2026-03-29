@@ -1,0 +1,30 @@
+<div class="pyq-container">
+  <div class="header">
+    <h1>📝 Previous Year Questions</h1>
+    <button (click)="clearChat()" class="clear-btn">🗑️ Clear</button>
+  </div>
+
+  <div class="pyq-content">
+    <div class="sidebar-pyq">
+      <h3>Select Year</h3>
+      <div class="year-selector">
+        <button 
+          *ngFor="let year of years"
+          (click)="onYearSelected(year)"
+          [class.selected]="selectedYear === year"
+          class="year-btn">
+          {{ year }}
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-wrapper">
+      <app-chat-interface
+        [messages]="messages"
+        [loading]="loading"
+        [placeholder]="'Search for specific topics or years...'"
+        [onSendMessage]="onSendMessage.bind(this)">
+      </app-chat-interface>
+    </div>
+  </div>
+</div>
