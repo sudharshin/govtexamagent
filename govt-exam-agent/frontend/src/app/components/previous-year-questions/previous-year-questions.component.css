@@ -1,0 +1,136 @@
+.pyq-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+}
+
+.header {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.clear-btn {
+  padding: 0.6rem 1.2rem;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255,255,255,0.3);
+  border-color: white;
+}
+
+.pyq-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar-pyq {
+  width: 150px;
+  background: #f5f5f5;
+  border-right: 1px solid #e0e0e0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.sidebar-pyq h3 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.year-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.year-btn {
+  padding: 0.7rem;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.year-btn:hover {
+  border-color: #4facfe;
+  background: #f0fbff;
+}
+
+.year-btn.selected {
+  background: #4facfe;
+  color: white;
+  border-color: #4facfe;
+}
+
+.chat-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .sidebar-pyq {
+    width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pyq-content {
+    flex-direction: column;
+  }
+
+  .sidebar-pyq {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1rem;
+  }
+
+  .year-selector {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .year-btn {
+    flex: 1;
+    min-width: 60px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.2rem;
+  }
+
+  .year-selector {
+    gap: 0.3rem;
+  }
+}

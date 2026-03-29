@@ -58,40 +58,66 @@ class StudyAgent:
         return state
     
     def _retrieve_context(self, state: AgentState) -> AgentState:
-        """Node 3: Retrieve relevant documents using RAG"""
-        context_docs = self.rag.retrieve(
-            f"List all projects or relevant items: {state['query']}",
-            session_id=state["session_id"]
-        )
-        state["context"] = "\n".join(context_docs) if context_docs else ""
+        """Node 3: Retrieve relevant documents using RAG if document uploaded"""
+        # Only retrieve context if user has uploaded a document
+        if state.get("has_document", False):
+            context_docs = self.rag.retrieve(state["query"], session_id=state["session_id"])
+            state["context"] = "\n".join(context_docs) if context_docs else ""
+        else:
+            state["context"] = ""
         return state
     
     def _create_prompt(self, state: AgentState) -> AgentState:
         """Node 4: Create system prompt based on context and intent"""
         if state["context"]:
+            # Document found and has content
             system_prompt = (
-                "You are a helpful assistant.\n"
-                "Extract ALL relevant projects from the context.\n"
-                "List every project clearly; do not skip any.\n"
-                "Answer ONLY using the provided document context."
+                "You are a helpful study assistant.\n"
+                "IMPORTANT INSTRUCTIONS:\n"
+                "1. Answer questions using ONLY the provided document context.\n"
+                "2. Do NOT generate MCQs, multiple choice questions, or quiz format.\n"
+                "3. Provide clear, detailed explanations with examples.\n"
+                "4. If the answer is found in the document, provide it with citations.\n"
+                "5. If the question is NOT covered in the document, explicitly state:\n"
+                "   'This topic is not covered in the uploaded document. Here's general knowledge:' "
+                "6. Format your response as continuous text, not as numbered lists unless necessary.\n"
             )
         else:
-            if state["intent"] == "STUDY":
+            # No document or document doesn't have relevant context
+            if state.get("has_document", False):
                 system_prompt = (
-                    "You are a helpful teacher. Explain clearly step by step. "
-                    "Use previous conversation context if needed."
+                    "You are a helpful study assistant.\n"
+                    "IMPORTANT INSTRUCTIONS:\n"
+                    "1. Do NOT generate MCQs, multiple choice questions, or quiz format.\n"
+                    "2. The user has uploaded a document, but your question doesn't seem to be related to it.\n"
+                    "3. Provide a detailed, clear explanation as continuous text.\n"
+                    "4. Use examples and step-by-step explanations.\n"
+                    "5. You can ask users if they want to ask questions related to the document.\n"
                 )
-            elif state["intent"] == "GENERAL":
-                system_prompt = "You are a helpful assistant."
             else:
-                system_prompt = "You are a helpful assistant."
+                if state["intent"] == "STUDY":
+                    system_prompt = (
+                        "You are a helpful teacher explaining concepts.\n"
+                        "IMPORTANT INSTRUCTIONS:\n"
+                        "1. Do NOT generate MCQs, multiple choice questions, quiz format, or numbered answer options.\n"
+                        "2. Explain concepts clearly step by step.\n"
+                        "3. Use examples, analogies, and real-world applications.\n"
+                        "4. Format your response as continuous paragraphs with proper structure.\n"
+                        "5. Use previous conversation context if needed.\n"
+                    )
+                else:
+                    system_prompt = (
+                        "You are a helpful assistant.\n"
+                        "IMPORTANT: Do NOT generate MCQs, multiple choice questions, or quiz format.\n"
+                        "Provide clear, helpful answers in conversational format."
+                    )
         
         state["system_prompt"] = system_prompt
         
         # Build messages
         messages = [{"role": "system", "content": system_prompt}]
         if state["context"]:
-            messages.append({"role": "system", "content": f"Context:\n{state['context']}"})
+            messages.append({"role": "system", "content": f"Document Context:\n{state['context']}"})
         messages.extend(state["history"])
         
         state["messages"] = messages
@@ -118,12 +144,13 @@ class StudyAgent:
             self.memory.update(state["session_id"], "assistant", state["response"])
         return state
     
-    def handle(self, session_id: str, query: str):
+    def handle(self, session_id: str, query: str, has_document: bool = False):
         """Execute the workflow"""
         # Initialize state
         initial_state = {
             "session_id": session_id,
             "query": query,
+            "has_document": has_document,
             "history": [],
             "intent": "",
             "context": "",

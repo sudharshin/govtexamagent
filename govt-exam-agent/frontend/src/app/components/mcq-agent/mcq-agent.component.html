@@ -1,0 +1,112 @@
+<div class="mcq-container">
+  <div class="header">
+    <h1>❓ Mock Test</h1>
+  </div>
+
+  <div *ngIf="questions.length === 0" class="mcq-input-area">
+    <div class="input-group">
+      <label for="topic">Topic:</label>
+      <input 
+        id="topic"
+        type="text" 
+        [(ngModel)]="topic"
+        [disabled]="loading"
+        placeholder="E.g., LCM and HCF, Algebra, etc.">
+    </div>
+
+    <div class="input-group">
+      <label for="numQuestions">Number of Questions:</label>
+      <input 
+        id="numQuestions"
+        type="number" 
+        [(ngModel)]="numQuestions"
+        min="1"
+        max="50"
+        [disabled]="loading">
+    </div>
+
+    <button 
+      (click)="generateMcq()"
+      [disabled]="loading"
+      class="generate-btn">
+      {{ loading ? '⏳ Generating...' : '🚀 Generate Test' }}
+    </button>
+  </div>
+
+  <div *ngIf="questions.length > 0 && !submitted" class="questions-area">
+    <div class="progress-bar">
+      <div class="progress" 
+        [style.width]="((getAnsweredCount() / questions.length) * 100) + '%'">
+      </div>
+    </div>
+    <p class="progress-text">{{ getAnsweredCount() }}/{{ questions.length }} answered</p>
+
+    <div class="questions-list">
+      <div *ngFor="let q of questions; let i = index" class="question-card">
+        <div class="question-header">
+          <span class="qno">Q{{ q.question_id }}</span>
+          <span class="difficulty" 
+            [style.color]="getDifficultyColor(q.difficulty)">
+            {{ q.difficulty }}
+          </span>
+        </div>
+
+        <p class="question-text">{{ q.question_text }}</p>
+
+        <div class="options">
+          <button 
+            *ngFor="let opt of q.options"
+            (click)="selectAnswer(q.question_id, opt.option_letter)"
+            [class.selected]="userAnswers[q.question_id] === opt.option_letter"
+            class="option-btn">
+            <span class="letter">{{ opt.option_letter }}</span>
+            <span class="text">{{ opt.text }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button (click)="submitAnswers()" class="submit-btn">
+      ✓ Submit Answers
+    </button>
+  </div>
+
+  <div *ngIf="submitted" class="results-area">
+    <div class="score-card">
+      <h2>🏆 Your Score</h2>
+      <div class="score-display">{{ score }}%</div>
+      <p class="score-text">
+        {{ score >= 75 ? '🎉 Excellent!' : score >= 50 ? '👍 Good job!' : '💪 Keep practicing!' }}
+      </p>
+    </div>
+
+    <div class="results-list">
+      <div *ngFor="let q of questions" class="result-card">
+        <div class="result-header">
+          <span class="qno">Q{{ q.question_id }}</span>
+          <span *ngIf="userAnswers[q.question_id] === q.correct_answer" class="correct-badge">✓ Correct</span>
+          <span *ngIf="userAnswers[q.question_id] !== q.correct_answer" class="incorrect-badge">✗ Incorrect</span>
+        </div>
+
+        <p class="question-text"><strong>Question:</strong> {{ q.question_text }}</p>
+
+        <div class="answer-review">
+          <div class="options-display">
+            <p><strong>Options:</strong></p>
+            <div *ngFor="let opt of q.options" class="option-display" [class.selected-opt]="userAnswers[q.question_id] === opt.option_letter">
+              <span class="opt-letter">{{ opt.option_letter }}.</span>
+              <span class="opt-text">{{ opt.text }}</span>
+            </div>
+          </div>
+          <p><strong>Your Answer:</strong> {{ userAnswers[q.question_id] }}</p>
+          <p><strong>Correct Answer:</strong> {{ q.correct_answer }}</p>
+          <p><strong>Explanation:</strong> {{ q.explanation }}</p>
+        </div>
+      </div>
+    </div>
+
+    <button (click)="resetTest()" class="reset-btn">
+      🔄 New Test
+    </button>
+  </div>
+</div>

@@ -14,6 +14,7 @@ mcq_agent = MCQAgent()
 class StudyRequest(BaseModel):
     session_id: str
     query: str
+    has_document: bool = False
 
 
 class MCQRequest(BaseModel):
@@ -27,8 +28,9 @@ def study(req: StudyRequest):
     """
     General study endpoint for asking questions and getting explanations.
     For MCQ generation, use /mcq endpoint instead.
+    - has_document: If True, prioritize document context; if False, use general knowledge
     """
-    result = study_agent.handle(req.session_id, req.query)
+    result = study_agent.handle(req.session_id, req.query, req.has_document)
     return result
 
 
@@ -62,8 +64,7 @@ def upload(session_id: str, file: UploadFile = File(...)):
     mcq_agent.rag.load_document(session_id, file_path)
 
     return {
+        "success": True,
         "message": "File uploaded successfully",
-        "file_name": file.filename,
-        "session_id": session_id,
-        "usage": "Use /study endpoint for questions or /mcq endpoint for MCQs"
+        "file_name": file.filename
     }

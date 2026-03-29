@@ -1,0 +1,43 @@
+<div class="chat-container">
+  <div class="messages-area" #messagesArea>
+    <div 
+      *ngFor="let msg of messages; trackBy: trackByMessageId"
+      class="message" 
+      [class.user]="msg.type === 'user'"
+      [class.assistant]="msg.type === 'assistant'"
+      [class.error]="msg.type === 'error'">
+      <div class="message-content">
+        <div *ngIf="msg.type === 'user'" class="badge user-badge">You</div>
+        <div *ngIf="msg.type === 'assistant'" class="badge assistant-badge">Agent</div>
+        <div *ngIf="msg.type === 'error'" class="badge error-badge">Error</div>
+        <p>{{ msg.content }}</p>
+      </div>
+      <div class="timestamp">{{ msg.timestamp | date:'short' }}</div>
+    </div>
+    
+    <div *ngIf="messages.length === 0" class="welcome-message">
+      <p>👋 Start by typing a question or uploading a document</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-indicator">
+      <div class="spinner"></div>
+      <p>Processing your request...</p>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input 
+      type="text"
+      [(ngModel)]="userInput"
+      [placeholder]="placeholder"
+      (keyup.enter)="sendMessage()"
+      [disabled]="loading"
+      class="input-field">
+    <button 
+      (click)="sendMessage()"
+      [disabled]="loading || !userInput.trim()"
+      class="send-btn">
+      Send
+    </button>
+  </div>
+</div>

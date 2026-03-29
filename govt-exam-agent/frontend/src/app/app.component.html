@@ -1,0 +1,65 @@
+<div class="app-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>📚 Exam Expert</h2>
+    </div>
+    <nav class="nav-menu">
+      <button 
+        class="nav-item" 
+        [class.active]="activeAgent === 'live-tutor'"
+        (click)="setAgent('live-tutor')">
+        <span class="icon">🎓</span>
+        <span>Live Tutor</span>
+      </button>
+      <button 
+        class="nav-item" 
+        [class.active]="activeAgent === 'mcq'"
+        (click)="setAgent('mcq')">
+        <span class="icon">❓</span>
+        <span>Mock Test</span>
+      </button>
+      <button 
+        class="nav-item" 
+        [class.active]="activeAgent === 'planner'"
+        (click)="setAgent('planner')">
+        <span class="icon">📅</span>
+        <span>Study Planner</span>
+      </button>
+      <button 
+        class="nav-item" 
+        [class.active]="activeAgent === 'previous-year'"
+        (click)="setAgent('previous-year')">
+        <span class="icon">📝</span>
+        <span>Previous Year</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Live Tutor Component -->
+    <app-live-tutor 
+      *ngIf="activeAgent === 'live-tutor'"
+      [sessionId]="sessionId">
+    </app-live-tutor>
+
+    <!-- MCQ Agent Component -->
+    <app-mcq-agent 
+      *ngIf="activeAgent === 'mcq'"
+      [sessionId]="sessionId">
+    </app-mcq-agent>
+
+    <!-- Planner Agent Component -->
+    <app-planner-agent 
+      *ngIf="activeAgent === 'planner'"
+      [sessionId]="sessionId">
+    </app-planner-agent>
+
+    <!-- Previous Year Questions Component -->
+    <app-previous-year-questions 
+      *ngIf="activeAgent === 'previous-year'"
+      [sessionId]="sessionId">
+    </app-previous-year-questions>
+  </main>
+</div>
