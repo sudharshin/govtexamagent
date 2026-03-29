@@ -45,12 +45,12 @@ class StudyAgent:
         return state
     
     def _detect_intent(self, state: AgentState) -> AgentState:
-        """Node 2: Detect user intent"""
+        """Node 2: Detect user intent (STUDY or GENERAL)"""
         query = state["query"].lower()
         
-        if "mcq" in query or "quiz" in query or "test" in query:
-            state["intent"] = "MCQ"
-        elif "explain" in query or "what is" in query or "define" in query:
+        # StudyAgent handles STUDY and GENERAL
+        # MCQ requests should use MCQAgent via /mcq endpoint
+        if "explain" in query or "what is" in query or "define" in query or "how to" in query:
             state["intent"] = "STUDY"
         else:
             state["intent"] = "GENERAL"
@@ -81,11 +81,8 @@ class StudyAgent:
                     "You are a helpful teacher. Explain clearly step by step. "
                     "Use previous conversation context if needed."
                 )
-            elif state["intent"] == "MCQ":
-                system_prompt = (
-                    "Generate 3 multiple choice questions with 4 options and answers. "
-                    "Use previous context if needed."
-                )
+            elif state["intent"] == "GENERAL":
+                system_prompt = "You are a helpful assistant."
             else:
                 system_prompt = "You are a helpful assistant."
         
