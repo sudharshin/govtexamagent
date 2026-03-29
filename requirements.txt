@@ -1,0 +1,20 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
+requests
+
+# 🔥 RAG dependencies
+langchain
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+faiss-cpu
+pypdf
+sentence-transformers
+python-multipart
+# (Optional but recommended for compatibility)
+transformers
+torch
