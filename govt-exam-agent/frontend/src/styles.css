@@ -23,8 +23,10 @@ html, body {
   padding: 0;
 }
 
-app-root {
-  display: block;
+/* in styles.css or global */
+app-root, app-chat-interface {
+  display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
