@@ -6,12 +6,34 @@
 
   <div class="planner-content">
     <div class="chat-wrapper">
-      <app-chat-interface
-        [messages]="messages"
-        [loading]="loading"
-        [placeholder]="'Tell me your exam and preparation timeline...'"
-        [onSendMessage]="onSendMessage.bind(this)">
-      </app-chat-interface>
+
+      <div class="messages-area">
+        <div *ngFor="let msg of messages" class="message" [ngClass]="msg.type">
+
+          <div class="bubble">
+            <pre *ngIf="msg.type === 'assistant'">{{ msg.content }}</pre>
+            <span *ngIf="msg.type !== 'assistant'">{{ msg.content }}</span>
+          </div>
+
+        </div>
+
+        <div *ngIf="loading" class="loading">
+          ⏳ Generating study plan...
+        </div>
+      </div>
+
+      <div class="input-area">
+        <input
+          #inputBox
+          type="text"
+          placeholder="Enter exam name..."
+          (keyup.enter)="onSendMessage(inputBox.value); inputBox.value=''"
+        />
+        <button (click)="onSendMessage(inputBox.value); inputBox.value=''">
+          Send
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

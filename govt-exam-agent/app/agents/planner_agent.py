@@ -1,40 +1,70 @@
 from app.services.llm_service import LLMService
+import re
 
 class PlannerAgent:
 
     def __init__(self):
         self.llm = LLMService()
 
-    def create_study_plan(self, exam_name: str):
+    def extract_duration(self, text: str):
+        text = text.lower()
+
+        match = re.search(r'(\d+)\s*month', text)
+        if match:
+            return int(match.group(1))
+
+        match = re.search(r'(\d+)\s*week', text)
+        if match:
+            weeks = int(match.group(1))
+            return max(1, weeks // 4)
+
+        return 3  # default
+
+    def create_study_plan(self, exam_input: str):
+
+        duration = self.extract_duration(exam_input)
 
         prompt = f"""
-You are an expert government exam preparation mentor.
+You are a HIGHLY ACCURATE government exam preparation expert.
 
-Create a COMPLETE STUDY PLAN for: {exam_name}
+User request: "{exam_input}"
 
-Include:
+Duration: {duration} months
+
+⚠️ STRICT RULES (VERY IMPORTANT):
+- Do NOT assume wrong subjects
+- Choose subjects ONLY relevant to the exam
+- If exam is general (RRB, SSC, TNPSC, Bank):
+  → Subjects = General Awareness, Quantitative Aptitude, Reasoning, English
+- Include technical subjects ONLY if exam explicitly requires it
+
+- Do NOT generate fake books or random names
+- Use ONLY well-known books (NCERT, RS Aggarwal, Arihant, Lucent, etc.)
+
+- Plan MUST be EXACTLY for {duration} months (NOT 6 months default)
+
+OUTPUT FORMAT (STRICT):
+
 1. Exam Overview
-2. Full Syllabus
-3. Subject-wise topics
-4. 3-month study plan (week-wise)
-5. Time allocation per subject
-6. Standard books (with authors)
-6. Online resources (websites, YouTube channels)
-8. Preparation strategy
-9. Revision plan
-10. Mock test strategy
+2. Subjects (accurate)
+3. Month-wise Plan (ONLY {duration} months)
+   - Week-wise breakdown
+4. Time Allocation (realistic %)
+5. Standard Books (real ones only)
+6. Online Resources (relevant)
+7. Strategy
+8. Revision Plan
+9. Mock Test Plan
 
-Make it structured, detailed, and easy to follow.
+Make it clean, structured, and readable.
 """
 
-        messages = [
-            {"role": "system", "content": "You are an expert exam planner."},
+        response = self.llm.generate([
             {"role": "user", "content": prompt}
-        ]
-
-        result = self.llm.generate(messages)
+        ])
 
         return {
-            "exam": exam_name,
-            "plan": result
+            "exam": exam_input,
+            "duration": duration,
+            "plan": response
         }

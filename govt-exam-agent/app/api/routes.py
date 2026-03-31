@@ -129,6 +129,7 @@ def get_previous_questions(exam: str):
         "pdfs": pdfs,
         "web_questions": web_questions
     }
-@router.get("/planner")
-def generate_plan(exam: str):
+@router.post("/planner")
+def generate_plan(req: dict):
+    exam = req.get("exam")
     return planner_agent.create_study_plan(exam)

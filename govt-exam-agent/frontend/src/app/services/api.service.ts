@@ -31,4 +31,10 @@ export class ApiService {
     formData.append('file', file);
     return this.http.post(`${API_BASE}/upload?session_id=${sessionId}`, formData);
   }
+  planner(sessionId: string, exam: string): Observable<any> {
+      return this.http.post(`${API_BASE}/planner`, {
+        session_id: sessionId,
+        exam
+      });
+  }
 }
