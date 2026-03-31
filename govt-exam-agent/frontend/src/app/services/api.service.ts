@@ -37,4 +37,9 @@ export class ApiService {
         exam
       });
   }
+  pyqs(exam: string): Observable<any> {
+  return this.http.get(`${API_BASE}/pyqs`, {
+    params: { exam }
+  });
+}
 }

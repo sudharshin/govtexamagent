@@ -1,12 +1,17 @@
 <div class="pyq-container">
+
+  <!-- HEADER -->
   <div class="header">
     <h1>📝 Previous Year Questions</h1>
     <button (click)="clearChat()" class="clear-btn">🗑️ Clear</button>
   </div>
 
   <div class="pyq-content">
+
+    <!-- SIDEBAR -->
     <div class="sidebar-pyq">
       <h3>Select Year</h3>
+
       <div class="year-selector">
         <button 
           *ngFor="let year of years"
@@ -18,13 +23,44 @@
       </div>
     </div>
 
+    <!-- MAIN CONTENT -->
     <div class="chat-wrapper">
+
+      <!-- CHAT -->
       <app-chat-interface
         [messages]="messages"
         [loading]="loading"
-        [placeholder]="'Search for specific topics or years...'"
+        [placeholder]="'Enter exam name (SSC, TNPSC, RRB...)'"
         [onSendMessage]="onSendMessage.bind(this)">
       </app-chat-interface>
+
+      <!-- PDF SECTION -->
+      <div class="results-section" *ngIf="pdfs.length > 0">
+        <h3>📄 PDF Papers</h3>
+
+        <div class="pdf-card" *ngFor="let pdf of pdfs">
+          <div class="pdf-title">{{ pdf.title }}</div>
+          <a [href]="pdf.url" target="_blank">📥 Download PDF</a>
+        </div>
+      </div>
+
+      <!-- QUESTIONS SECTION -->
+      <div class="results-section" *ngIf="questions.length > 0">
+        <h3>📚 Extracted Questions</h3>
+
+        <div class="question-card" *ngFor="let item of questions">
+          <h4>{{ item.title }}</h4>
+
+          <ul>
+            <li *ngFor="let q of item.questions">
+              {{ q }}
+            </li>
+          </ul>
+
+          <a [href]="item.url" target="_blank">🔗 Source</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

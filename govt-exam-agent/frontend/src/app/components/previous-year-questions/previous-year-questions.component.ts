@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { ApiService } from '../../services/api.service';
 import { ResponseFormatterService, ChatMessage } from '../../services/response-formatter.service';
 
 @Component({
@@ -7,85 +8,106 @@ import { ResponseFormatterService, ChatMessage } from '../../services/response-f
   styleUrls: ['./previous-year-questions.component.css']
 })
 export class PreviousYearQuestionsComponent implements OnInit, OnDestroy {
+
   @Input() sessionId: string = '';
 
   messages: ChatMessage[] = [];
   loading: boolean = false;
+
   selectedYear: string = '';
+  selectedExam: string = '';
+
   years: string[] = ['2023', '2022', '2021', '2020', '2019'];
+
+  pdfs: any[] = [];
+  questions: any[] = [];
+
   private sessionStorageKey = '';
 
-  constructor(private formatter: ResponseFormatterService) {}
+  constructor(
+    private formatter: ResponseFormatterService,
+    private api: ApiService
+  ) {}
 
   ngOnInit() {
     this.sessionStorageKey = `prev-year-${this.sessionId}`;
-    const savedMessages = sessionStorage.getItem(this.sessionStorageKey);
-    if (savedMessages) {
-      this.messages = JSON.parse(savedMessages);
-    } else {
-      this.messages.push(
-        this.formatter.createChatMessage(
-          'assistant',
-          '📝 Welcome to Previous Year Questions! Select a year or ask for specific questions from past exams.'
-        )
-      );
-      this.saveMessages();
-    }
-  }
 
-  ngOnDestroy() {
-    this.saveMessages();
-  }
-
-  private saveMessages() {
-    sessionStorage.setItem(this.sessionStorageKey, JSON.stringify(this.messages));
-  }
-
-  onYearSelected(year: string) {
-    this.selectedYear = year;
-    this.messages.push(this.formatter.createChatMessage('user', `Show me questions from ${year}`));
-    this.loading = true;
-
-    // Simulated response (backend hook pending)
-    setTimeout(() => {
-      this.messages.push(
-        this.formatter.createChatMessage(
-          'assistant',
-          `📚 Here are featured questions from ${year}:\n\n1. Define LCM and HCF with examples\n2. Solve: Find LCM(24, 36)\n3. Real-world application question\n\nWould you like to practice these?`
-        )
-      );
-      this.loading = false;
-      this.saveMessages();
-    }, 1000);
+    this.messages.push(
+      this.formatter.createChatMessage(
+        'assistant',
+        '📝 Enter exam name (e.g., SSC CGL, TNPSC, RRB) or select a year.'
+      )
+    );
   }
 
   onSendMessage(message: string) {
     if (!message.trim()) return;
 
+    this.selectedExam = message;
+
     this.messages.push(this.formatter.createChatMessage('user', message));
+    this.fetchPYQs(message);
+  }
+
+  onYearSelected(year: string) {
+    this.selectedYear = year;
+
+    if (!this.selectedExam) {
+      this.messages.push(
+        this.formatter.createChatMessage('error', '⚠️ Please enter exam name first')
+      );
+      return;
+    }
+
+    const query = `${this.selectedExam} ${year}`;
+
+    this.messages.push(
+      this.formatter.createChatMessage('user', `📅 ${query}`)
+    );
+
+    this.fetchPYQs(query);
+  }
+
+  fetchPYQs(query: string) {
     this.loading = true;
 
-    setTimeout(() => {
-      this.messages.push(
-        this.formatter.createChatMessage(
-          'assistant',
-          '✅ Found 5 relevant questions matching your search. Would you like to attempt them as a test?'
-        )
-      );
-      this.loading = false;
-      this.saveMessages();
-    }, 1000);
+    this.api.pyqs(query).subscribe({
+      next: (res) => {
+        this.pdfs = res.pdfs || [];
+        this.questions = res.web_questions || [];
+
+        this.messages.push(
+          this.formatter.createChatMessage(
+            'assistant',
+            `✅ Found ${this.pdfs.length} PDFs and ${this.questions.length} question sets`
+          )
+        );
+
+        this.loading = false;
+      },
+      error: () => {
+        this.messages.push(
+          this.formatter.createChatMessage('error', '❌ Failed to fetch PYQs')
+        );
+        this.loading = false;
+      }
+    });
   }
 
   clearChat() {
     this.messages = [];
+    this.pdfs = [];
+    this.questions = [];
     this.selectedYear = '';
+    this.selectedExam = '';
+
     this.messages.push(
       this.formatter.createChatMessage(
         'assistant',
-        '📝 Chat cleared. Select a year to see previous year questions.'
+        '📝 Chat cleared. Enter exam name again.'
       )
     );
-    this.saveMessages();
   }
+
+  ngOnDestroy() {}
 }

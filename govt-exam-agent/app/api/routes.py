@@ -69,13 +69,19 @@ def upload(session_id: str, file: UploadFile = File(...)):
         "message": "File uploaded successfully",
         "file_name": file.filename
     }
+@router.post("/planner")
+def generate_plan(req: dict):
+    exam = req.get("exam")
+    return planner_agent.create_study_plan(exam)
 @router.get("/pyqs")
 def get_previous_questions(exam: str):
     search_results = tavily_service.search_exam_content(exam)
 
     pdfs = []
     web_questions = []
+
     seen_urls = set()
+    seen_pdfs = set()   # ✅ NEW: to avoid duplicate PDFs
 
     for result in search_results.get("results", []):
         url = result.get("url")
@@ -94,21 +100,28 @@ def get_previous_questions(exam: str):
 
             first_result = extracted["results"][0]
 
-            # ✅ Handle both content types
             content = first_result.get("content") or first_result.get("raw_content")
 
             if not content:
                 continue
 
-            # ✅ Extract PDF links from content
+            # ============================
+            # ✅ FIX 1: REMOVE DUPLICATE PDFS
+            # ============================
             pdf_links = extract_pdf_links(content)
-            for pdf in pdf_links:
-                pdfs.append({
-                    "title": title,
-                    "url": pdf
-                })
 
-            # ✅ Extract questions
+            for pdf in pdf_links:
+                if pdf not in seen_pdfs:   # ✅ CHECK
+                    seen_pdfs.add(pdf)
+
+                    pdfs.append({
+                        "title": title,
+                        "url": pdf
+                    })
+
+            # ============================
+            # ✅ FIX 2: QUESTIONS
+            # ============================
             questions = extract_questions(content)
 
             if not questions:
@@ -117,7 +130,7 @@ def get_previous_questions(exam: str):
             web_questions.append({
                 "title": title,
                 "url": url,
-                "questions": questions[:5]  # limit
+                "questions": questions[:5]
             })
 
         except Exception as e:
@@ -129,7 +142,3 @@ def get_previous_questions(exam: str):
         "pdfs": pdfs,
         "web_questions": web_questions
     }
-@router.post("/planner")
-def generate_plan(req: dict):
-    exam = req.get("exam")
-    return planner_agent.create_study_plan(exam)
