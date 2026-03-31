@@ -5,13 +5,13 @@ from app.services.tavily_service import TavilyService
 from app.utils.text_processing import extract_questions,extract_pdf_links
 from app.agents.study_agent import StudyAgent
 from app.agents.mcq_agent import MCQAgent
-
+from app.agents.planner_agent import PlannerAgent
 router = APIRouter()
 
 study_agent = StudyAgent()
 mcq_agent = MCQAgent()
 tavily_service = TavilyService()
-
+planner_agent = PlannerAgent()
 class StudyRequest(BaseModel):
     session_id: str
     query: str
@@ -129,3 +129,6 @@ def get_previous_questions(exam: str):
         "pdfs": pdfs,
         "web_questions": web_questions
     }
+@router.get("/planner")
+def generate_plan(exam: str):
+    return planner_agent.create_study_plan(exam)
